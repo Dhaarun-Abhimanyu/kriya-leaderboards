@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixelToPrototype Leaderboards</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="max-w-4xl mx-auto my-12 p-8">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">PixelToPrototype</h1>
+            <p class="text-lg text-gray-700">GitHub Campus Club X PSG College of Technology</p>
+        </header>
+        <main>
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Leaderboards</h2>
+            <div class="relative w-full overflow-auto">
+                <table id="leaderboardTable" class="w-full caption-bottom text-sm">
+                    <thead class="[&amp;_tr]:border-b">
+                        <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                            <th class="h-12 px-4 align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0 text-left">
+                                Rank
+                            </th>
+                            <th class="h-12 px-4 align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0 text-left">
+                                Name
+                            </th>
+                            <th class="h-12 px-4 align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0 text-left">
+                                Points
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="[&amp;_tr:last-child]:border-0">
+                        <!-- Table body will be dynamically populated using JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="rounded-lg border bg-card text-card-foreground shadow-sm h-full w-full max-w-2xl" data-v0-t="card">
+                <div class="flex flex-col space-y-1.5 p-6">
+                    <h3 class="text-2xl font-semibold whitespace-nowrap leading-none tracking-tight">
+                        Graph
+                    </h3>
+                    <p class="text-sm text-muted-foreground">
+                        A graph showing performance trends.
+                    </p>
+                </div>
+                <div class="p-6">
+                    <canvas id="performanceGraph" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Function to fetch leaderboard data from the local server
+        async function fetchLeaderboardData() {
+            try {
+                const response = await fetch('/leaderboard'); // Use the correct route
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching leaderboard data:', error);
+                return [];
+            }
+        }
+    
+        // Function to update the table with dynamic data
+        async function updateTable() {
+            const leaderboardData = await fetchLeaderboardData();
+            const tableBody = document.getElementById('leaderboardTable').getElementsByTagName('tbody')[0];
+    
+            // Clear existing rows
+            tableBody.innerHTML = '';
+    
+            // Populate table with dynamic data
+            leaderboardData.forEach(entry => {
+                const row = tableBody.insertRow();
+                row.innerHTML = `<td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">${entry.Rank}</td>
+                                <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">${entry['Team Name']}</td>
+                                <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">${entry.Points}</td>`;
+            });
+        }
+    
+        // Function to update the chart with dynamic data
+        async function updateChart() {
+            const leaderboardData = await fetchLeaderboardData();
+            const ctx = document.getElementById('performanceGraph').getContext('2d');
+    
+            const myChart = new Chart(ctx, {
+                type: 'bar', // Change the chart type if needed
+                data: {
+                    labels: leaderboardData.map(entry => entry['Team Name']),
+                    datasets: [{
+                        label: 'Points',
+                        data: leaderboardData.map(entry => entry.Points),
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    
+        // Initial data update
+        updateTable();
+        updateChart();
+    </script>
+    
+</body>
+</html>
