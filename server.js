@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
  
 app.get('/leaderboard', async (req, res) => {
     console.log('Leaderboard request received');
-
+    let client; // Declare client outside the try block
     try {
         const client = new MongoClient("mongodb+srv://weebybungeegon:e42t4r0HZmx53J9t@cluster0.tclywox.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", {
             useUnifiedTopology: true
