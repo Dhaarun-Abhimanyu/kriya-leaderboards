@@ -53,10 +53,16 @@
     </div>
 
     <script>
-        // Function to fetch leaderboard data from the local server
+        // Define leaderboardData globally
+        let leaderboardData;
+
+        // Function to fetch leaderboard data from the server
         async function fetchLeaderboardData() {
             try {
-                const response = await fetch('/leaderboard'); // Use the correct route
+                const response = await fetch('/leaderboard');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
                 const data = await response.json();
                 return data;
             } catch (error) {
@@ -64,33 +70,44 @@
                 return [];
             }
         }
-    
+
+        // Function to update the table and chart with dynamic data
+        async function updateData() {
+            try {
+                // Fetch data from the server
+                leaderboardData = await fetchLeaderboardData();
+                
+                // Update the table with dynamic data
+                updateTable();
+
+                // Update the chart with dynamic data
+                updateChart();
+            } catch (error) {
+                console.error('Error updating data:', error);
+            }
+        }
+
         // Function to update the table with dynamic data
-        async function updateTable() {
-            const leaderboardData = await fetchLeaderboardData();
+        function updateTable() {
             const tableBody = document.getElementById('leaderboardTable').getElementsByTagName('tbody')[0];
-    
-            // Clear existing rows
             tableBody.innerHTML = '';
-    
-            // Populate table with dynamic data
+
             leaderboardData.forEach(entry => {
                 const row = tableBody.insertRow();
                 row.innerHTML = `<td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">${entry.Rank}</td>
-                                <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">${entry['Team Name']}</td>
+                                <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">${entry['TeamName']}</td>
                                 <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">${entry.Points}</td>`;
             });
         }
-    
+
         // Function to update the chart with dynamic data
-        async function updateChart() {
-            const leaderboardData = await fetchLeaderboardData();
+        function updateChart() {
             const ctx = document.getElementById('performanceGraph').getContext('2d');
-    
+
             const myChart = new Chart(ctx, {
-                type: 'bar', // Change the chart type if needed
+                type: 'bar',
                 data: {
-                    labels: leaderboardData.map(entry => entry['Team Name']),
+                    labels: leaderboardData.map(entry => entry['TeamName']),
                     datasets: [{
                         label: 'Points',
                         data: leaderboardData.map(entry => entry.Points),
@@ -108,11 +125,9 @@
                 }
             });
         }
-    
+
         // Initial data update
-        updateTable();
-        updateChart();
+        updateData();
     </script>
-    
 </body>
 </html>

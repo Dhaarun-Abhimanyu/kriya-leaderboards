@@ -1,8 +1,13 @@
 const express = require('express');
 const path = require('path');
-const XLSX = require('xlsx');
+const { MongoClient } = require('mongodb');
+const cors = require('cors');
+
 const app = express();
 const port = 3000;
+
+// Enable CORS for all routes
+app.use(cors());
 
 // Serve static files (including your HTML) from the 'public' directory
 app.use(express.static('public'));
@@ -11,16 +16,34 @@ app.use(express.static('public'));
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+ 
+app.get('/leaderboard', async (req, res) => {
+    console.log('Leaderboard request received');
 
-app.get('/leaderboard', (req, res) => {
     try {
-        const workbook = XLSX.readFile('testdata.xlsx');
-        const sheetName = workbook.SheetNames[0];
-        const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+        const client = new MongoClient("mongodb+srv://weebybungeegon:e42t4r0HZmx53J9t@cluster0.tclywox.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", {
+            useUnifiedTopology: true
+        });
+
+        await client.connect();
+
+        // Specify your MongoDB database and collection
+        const database = client.db('Kriya_Leaderboard');
+        const collection = database.collection('Team_scoreboard');
+
+        // Fetch data from MongoDB
+        const jsonData = await collection.find().toArray();
+        
+        // Send the JSON data as the response
         res.json(jsonData);
     } catch (error) {
-        console.error('Error reading Excel file:', error);
+        console.error('Error reading data from MongoDB:', error);
         res.status(500).send('Internal Server Error');
+    } finally {
+        // Close the MongoDB connection when done
+        if (client) {
+            await client.close();
+        }
     }
 });
 
