@@ -15,6 +15,25 @@
         </header>
         <main>
             <h2 class="text-2xl font-bold text-gray-900 mb-6">Leaderboards</h2>
+            
+            <div class="rounded-lg border bg-card text-card-foreground shadow-sm h-full w-full max-w-2xl" data-v0-t="card">
+                <div class="flex flex-col space-y-1.5 p-6">
+                    <h3 class="text-2xl font-semibold whitespace-nowrap leading-none tracking-tight">
+                        Graph
+                    </h3>
+                    <p class="text-sm text-muted-foreground">
+                        A graph showing performance trends.
+                    </p>
+                </div>
+                <div class="p-6">
+                    <canvas id="performanceGraph" width="400" height="200"></canvas>
+                </div>
+            </div>
+            
+            <h3 class="text-2xl font-semibold whitespace-nowrap leading-none tracking-tight py-6">
+                Standings
+            </h3>
+            
             <div class="relative w-full overflow-auto">
                 <table id="leaderboardTable" class="w-full caption-bottom text-sm">
                     <thead class="[&amp;_tr]:border-b">
@@ -34,20 +53,6 @@
                         <!-- Table body will be dynamically populated using JavaScript -->
                     </tbody>
                 </table>
-            </div>
-
-            <div class="rounded-lg border bg-card text-card-foreground shadow-sm h-full w-full max-w-2xl" data-v0-t="card">
-                <div class="flex flex-col space-y-1.5 p-6">
-                    <h3 class="text-2xl font-semibold whitespace-nowrap leading-none tracking-tight">
-                        Graph
-                    </h3>
-                    <p class="text-sm text-muted-foreground">
-                        A graph showing performance trends.
-                    </p>
-                </div>
-                <div class="p-6">
-                    <canvas id="performanceGraph" width="400" height="200"></canvas>
-                </div>
             </div>
         </main>
     </div>
@@ -103,14 +108,15 @@
         // Function to update the chart with dynamic data
         function updateChart() {
             const ctx = document.getElementById('performanceGraph').getContext('2d');
+            const newleaderboardData = leaderboardData.slice(0, 5);
 
             const myChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: leaderboardData.map(entry => entry['TeamName']),
+                    labels: newleaderboardData.map(entry => entry['TeamName']),
                     datasets: [{
                         label: 'Points',
-                        data: leaderboardData.map(entry => entry.Points),
+                        data: newleaderboardData.map(entry => entry.Points),
                         backgroundColor: 'rgba(75, 192, 192, 0.2)',
                         borderColor: 'rgba(75, 192, 192, 1)',
                         borderWidth: 1
